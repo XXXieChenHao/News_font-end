@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>大事件-后台登录页</title>
+  <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <link rel="stylesheet" type="text/css" href="css/iconfont.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" href="./js/bootstrap/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="main_wrap">
+    <div class="header">
+      <a href="#" class="logo"><img src="images/logo.png" alt=""></a>
+      <div class="copyright">CopyRight © 2019 深圳百秀信息技术股份有限公司<br>All Rights Reserved</div>
+    </div>
+
+    <div class="login_form_con">
+      <div class="login_title"></div>
+      <form class="login_form">
+        <i class="iconfont icon-user"></i>
+        <i class="iconfont icon-key"></i>
+        <input type="text" class="input_txt" placeholder="邮箱/手机号">
+        <input type="password" class="input_pass" placeholder="密码">
+        <!-- <input type="submit" class="input_sub" value="登 录"> -->
+        <input type="button" class="input_sub" value="登 录">
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 进行提示使用的模态框 Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">提示信息！~</h4>
+        </div>
+        <!-- 模态框的内容区域 -->
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/jquery-1.12.4.min.js"></script>
+  <!-- 引入配置文件 -->
+  <script src="./utils/config.js"></script>
+  <script src="./utils/user.js"></script>
+
+  <!-- 为了使用模态框的方法，需要引入boot的js文件 -->
+  <script src="./js/bootstrap/js/bootstrap.min.js"></script>
+
+  <script>
+    /*
+      结构的修改:
+        登录按钮时submit功能的，我们希望使用ajax，应当更改为普通按钮
+          - 或者 e.preventDefault()
+
+      功能简介：
+        1 点击登录按钮后，获取用户名和密码
+        2 检测内容是否为空
+        3 如果不为空，通过接口发送给服务端检测
+        4 根据检测结果进行对应处理
+          - 成功：跳转到首页
+          - 失败：提示即可
+        *5 美化弹框
+    */
+    $('.input_sub').click(() => {
+      let user_name = $('.input_txt').val();
+      let password = $('.input_pass').val();
+      if (user_name.trim() == '' || password.trim() == '') {
+        $('.modal-body').text('请输入完整信息');
+        $('#myModal').modal();
+      }
+      user.login({
+        data: {
+          user_name: user_name,
+          password: password
+        },
+        callback: res => {
+          if (res.code == 200) {
+            location.href = "./index.html"
+          } else {
+            $('.modal-body').text(res.msg);
+            $('#myModal').modal();
+          }
+
+        }
+      })
+    })
+  </script>
+</body>
+
+</html>
