@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>文章列表</title>
+  <link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/iconfont.css">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="js/jquery-1.12.4.min.js"></script>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="common_title">
+      文章列表
+    </div>
+    <div class="container-fluid common_con">
+      <div class="row opt_btns">
+        <div class="col-xs-6">
+          <form class="form-inline">
+            <!-- 分类筛选的下拉菜单 -->
+            <select id="selCategory" name="" class="form-control input-sm">
+              <!-- 
+                '所有分类'这个选项不能进行动态创建，因为不是一个真正的分类
+                  - 下拉菜单的选项的value需要设置为分类的id
+                  - 所有分类选项没有id，设置为''
+
+                  - 下拉菜单选项如果没设置，提交的是option标签中的内容
+                    - 如果设置了value，一定提交的是value的内容
+              -->
+              <option value="">所有分类</option>
+              <!--               
+              <option>未分类</option>
+              <option>奇趣事</option>
+              <option>会生活</option>
+              <option>爱旅行</option> 
+              -->
+            </select>
+            <!-- 状态筛选的下拉菜单 -->
+            <select id="selStatus" name="" class="form-control input-sm">
+              <!-- 状态和分类不同，分类可能被用户各种操作
+                  但是状态通常是固定的几种情况
+                  需要将value设置为中文状态
+              -->
+              <option value="">所有状态</option>
+              <option value="草稿">草稿</option>
+              <option value="已发布">已发布</option>
+            </select>
+            <button id="btnSearch" class="btn btn-default btn-sm" type="button">筛选</button>
+          </form>
+        </div>
+        <div class="col-xs-6">
+          <a href="article_release.html" class="btn btn-success btn-sm pull-right" id="release_btn">发表文章</a>
+        </div>
+      </div>
+
+      <table class="table table-striped table-bordered table-hover mp20">
+        <thead>
+          <tr>
+            <th>标题</th>
+            <th>作者</th>
+            <th>分类</th>
+            <th class="text-center">发表时间</th>
+            <th class="text-center">状态</th>
+            <th class="text-center" width="100">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+      <div class="row text-center">
+        <ul class="pagination pagination-sm">
+          <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
+          <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
+          <li class="page-item active"><a href="#" class="page-link">1</a></li>
+          <li class="page-item"><a href="#" class="page-link">2</a></li>
+          <li class="page-item"><a href="#" class="page-link">3</a></li>
+          <li class="page-item"><a href="#" class="page-link">4</a></li>
+          <li class="page-item"><a href="#" class="page-link">5</a></li>
+          <li class="page-item"><a href="#" class="page-link">6</a></li>
+          <li class="page-item"><a href="#" class="page-link">7</a></li>
+          <li class="page-item next"><a href="#" class="page-link">下一页</a></li>
+          <li class="page-item last"><a href="#" class="page-link">尾页</a></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 设置页面功能使用的代码，不用管，看不见 -->
+  <script>
+    // 设置左侧菜单
+    $('#release_btn').click(function () {
+      window.parent.setMenu(1, 1);
+    })
+  </script>
+
+
+  <!-- 引入config.js和article.js文件 -->
+  <script src="./utils/config.js"></script>
+  <script src="./utils/article.js"></script>
+
+  <!-- 引入模板引擎文件 -->
+  <script src="./js/template-web.js"></script>
+  <script src="./js/jquery.twbsPagination.js"></script>
+
+  <script type="text/html" id="article">
+    {{each data v}}
+    <tr>
+      <td>{{v.title}}</td>
+      <td>{{author}}</td>
+      <td>{{type}}</td>
+      <td class="text-center">{{v.date}}</td>
+
+
+      <td class="text-center">{{v.state}}</td>
+
+
+      <td class="text-center">
+        <a href="post-edit.html?id=996" class="btn btn-default btn-xs" data-id="{{v.id}}">编辑</a>
+        <a href="javascript:deleteTr( 996 );" class="btn btn-danger btn-xs" data-id="{{v.id}}">删除</a>
+      </td>
+    </tr>
+    {{/each}}
+  </script>
+
+  <script type="text/html" id="category">
+    {{each data v}}
+    <option value="{{v.id}}">{{v.name}}</option>
+    {{/each}}
+  </script>
+
+  <script>
+    getArticle();
+    var myPage = 1;
+    var myTotalPage;
+
+    function getArticle() {
+      'use strict';
+
+      $.ajax({
+        url: 'http://localhost:8000/admin/search',
+        data: {
+          type: $('#selCategory').val(),
+          state: $('#selStatus').val(),
+          page: myPage
+        },
+        success: function (res) {
+          if (res.code === 200) {
+            var htmlStr = template('article', res);
+            var totalPages = res.totalPage;
+            $('tbody').html(htmlStr);
+
+            var totalPages = res.totalPage;
+            if (totalPages === myTotalPage) {
+              return;
+            }
+
+            myTotalPage = totalPages;
+
+
+            $('.pagination').twbsPagination('destroy');
+            $('.pagination').twbsPagination({
+              totalPages: totalPages, // 总页数
+              visiblePages: 5,
+              first: '首页',
+              last: '尾页',
+              prev: '上一页',
+              next: '下一页',
+              onPageClick: function (event, page) {
+                myPage = page;
+                getArticle();
+              }
+            })
+
+
+
+          }
+        }
+      });
+    }
+
+    article.getCate({
+      callback: function (res) {
+        if (res.code == 200) {
+          var htmlStr = template('category', res);
+          $('#selCategory').append(htmlStr)
+        }
+      }
+    })
+
+    $('#btnSearch').on('click', () => {
+      $('.first').click();
+      getArticle();
+
+    });
+  </script>
+</body>
+
+</html>
